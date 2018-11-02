@@ -1,2 +1,6 @@
-/node_modules
-package-lock.json
+/notes-app/node_modules
+/notes_app/package-lock.json
+/hello_world/node_modules
+/hello_world/package-lock.json
+/weather-app/node_modules
+/weather-app/package-lock.json
