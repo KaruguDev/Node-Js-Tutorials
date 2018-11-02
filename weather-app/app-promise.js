@@ -22,6 +22,7 @@ var geocodeURL = `https://api.tomtom.com/search/2/search/${URIencodedLocation}.j
 
 axios.get(geocodeURL).then((resp) => {
   if (resp.data.results.length === 0){
+    //throw error if there is no data in results array
     throw new Error(`Unable to find location ${resp.data.summary.query}`)
   }
 
@@ -45,6 +46,7 @@ axios.get(geocodeURL).then((resp) => {
           if (err.response === 'undefined' || err.code === 'EAI_AGAIN'){
             console.log('unable to connect to forecast.io Servers')
           }else{
+            //display error
             console.log(err.message)
           }
 
