@@ -9,11 +9,39 @@ MongoClient.connect(mongodb_url, { useNewUrlParser: true }, (err, client) => {
   }
   db = client.db(db_name)
 
-  db.collection('ToDos').find({name: 'Paul K'}).toArray().then((docs) => {
-    console.log(`ToDos count: ${docs.length}`)
-    console.log(JSON.stringify(docs, undefined, 2))
+  //deleteMany
+  // db.collection('ToDos').deleteMany({task:'Go for running'}).then((result) => {
+  //   console.log(result)
+  // }, (err) => {
+  //   console.log('Unable to delete from ToDos', err)
+  // })
+  // db.collection('Users').deleteMany({name: 'Paul K'}).then((result) => {
+  //   console.log(result)
+  // }, (err) => {
+  //   console.log(err)
+  // })
+  //deleteOne
+  // db.collection('ToDos').deleteOne({task:'Go to Kericho'}).then((result) => {
+  //   console.log(result)
+  // }, (err) => {
+  //   console.log(err)
+  // })
+  // db.collection('ToDos').deleteOne({}).then((result) => {
+  //   console.log(result)
+  // }, (err) => {
+  //   console.log('Unable to delete from ToDos', err)
+  // })
+  //
+  //findOneAndDelete
+  // db.collection('ToDos').findOneAndDelete({completed:'false'}).then((result) => {
+  //   console.log(result)
+  // }, (err) => {
+  //   console.log(err)
+  // })
+  db.collection('Users').findOneAndDelete({_id: new ObjectID("5bed2893bb1696f9414e9b20")}).then((result) => {
+    console.log(result)
   }, (err) => {
-    console.log('Unable to fetch ToDos', err)
+    console.log(err)
   })
   //close the connection
   client.close()
