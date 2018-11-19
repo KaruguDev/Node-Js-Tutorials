@@ -20,6 +20,16 @@ app.post('/todos', (req, resp) => {
   })
 })
 
+app.get('/todos', (req, resp) => {
+  todo.find().then((todos) => {
+    resp.send({todos})
+  },(err) =>{
+    resp.status(400).send(err)
+  })
+})
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`)
 })
+
+module.exports = {app}
