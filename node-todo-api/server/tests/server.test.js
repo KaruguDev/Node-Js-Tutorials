@@ -15,6 +15,10 @@ var todos = [
   {
     _id: new ObjectID(),
     text: 'this is second to do'
+  },
+  {
+    _id: new ObjectID(),
+    text: 'i should be deleted'
   }
 ]
 
@@ -78,7 +82,7 @@ describe('GET /todos', () => {
   })
 })
 
-describe('GET /todos:id', () => {
+describe('GET /todos/:id', () => {
   it('should return a todo doc', (done) => {
     request(app)
       .get(`/todos/${todos[0]._id.toHexString()}`)
@@ -89,16 +93,42 @@ describe('GET /todos:id', () => {
       .end(done)
   })
 
-  it('valid id should return 404', (done) => {
+  it('should return 404 and id is valid', (done) => {
     request(app)
       .get(`/todos/${new_id.toHexString()}`)
       .expect(404)
       .end(done)
   })
 
-  it('invalid id should return 404', (done) => {
+  it('should return 404 and id is invalid', (done) => {
     request(app)
       .get(`/todos/c1v1lwar`)
+      .expect(404)
+      .end(done)
+  })
+})
+
+describe('DELETE /todos/:id', () => {
+  it('should delete a todo doc', (done) => {
+    request(app)
+      .delete(`/todos/${todos[2]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(todos[2].text)
+      })
+      .end(done)
+  })
+
+  it('should return 404 and id is valid', (done) => {
+    request(app)
+      .delete(`/todos/${new_id.toHexString()}`)
+      .expect(404)
+      .end(done)
+  })
+
+  it('should return 404 and id is invalid', (done) => {
+    request(app)
+      .delete(`/todos/av3ng3rs`)
       .expect(404)
       .end(done)
   })
