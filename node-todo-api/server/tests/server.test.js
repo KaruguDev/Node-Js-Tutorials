@@ -1,15 +1,24 @@
 const request = require('supertest')
 const expect = require('expect')
 const sinon = require('sinon')
+const {ObjectID} = require('mongodb')
 
 const {app} = require('./../server')
 const {todo} = require('./../models/todo')
 
 var text = 'Hey I am test'
 var todos = [
-  {text: 'this is first to do'},
-  {text: 'this is second to do'}
+  {
+    _id: new ObjectID(),
+    text: 'this is first to do'
+  },
+  {
+    _id: new ObjectID(),
+    text: 'this is second to do'
+  }
 ]
+
+var new_id = new ObjectID()
 
 beforeEach((done) => {
   //delete todos
@@ -65,6 +74,32 @@ describe('GET /todos', () => {
       .expect((res) => {
           expect(res.body.todos.length).toBeGreaterThanOrEqual(2)
         })
+      .end(done)
+  })
+})
+
+describe('GET /todos:id', () => {
+  it('should return a todo doc', (done) => {
+    request(app)
+      .get(`/todos/${todos[0]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(todos[0].text)
+      })
+      .end(done)
+  })
+
+  it('valid id should return 404', (done) => {
+    request(app)
+      .get(`/todos/${new_id.toHexString()}`)
+      .expect(404)
+      .end(done)
+  })
+
+  it('invalid id should return 404', (done) => {
+    request(app)
+      .get(`/todos/c1v1lwar`)
+      .expect(404)
       .end(done)
   })
 })
