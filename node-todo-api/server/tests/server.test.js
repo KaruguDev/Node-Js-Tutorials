@@ -14,7 +14,9 @@ var todos = [
   },
   {
     _id: new ObjectID(),
-    text: 'this is second to do'
+    text: 'this is second to do',
+    completed: true,
+    completedAt: 1237283383
   },
   {
     _id: new ObjectID(),
@@ -110,13 +112,23 @@ describe('GET /todos/:id', () => {
 
 describe('DELETE /todos/:id', () => {
   it('should delete a todo doc', (done) => {
+    var todo_id = todos[2]._id.toHexString()
     request(app)
-      .delete(`/todos/${todos[2]._id.toHexString()}`)
+      .delete(`/todos/${todo_id}`)
       .expect(200)
       .expect((res) => {
         expect(res.body.todo.text).toBe(todos[2].text)
       })
-      .end(done)
+      .end((err, res) => {
+        if(err){
+          return done(err)
+        }
+        //check to see if the doc exists
+        todo.findById(todo_id).then((n) => {
+          expect(n).toBeNull()
+          done()
+        })
+      })
   })
 
   it('should return 404 and id is valid', (done) => {
@@ -129,6 +141,38 @@ describe('DELETE /todos/:id', () => {
   it('should return 404 and id is invalid', (done) => {
     request(app)
       .delete(`/todos/av3ng3rs`)
+      .expect(404)
+      .end(done)
+  })
+})
+
+describe('PATCH /todos/:id', () => {
+  it('should update todo doc', (done) => {
+    var todo_id = todos[1]._id.toHexString()
+    var body = {text: 'test todo doc update', completed: false}
+
+    request(app)
+      .patch(`/todos/${todo_id}`)
+      .send(body)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(body.text)
+        expect(res.body.todo.completed).toBeFalsy()
+        expect(res.body.todo.completedAt).toBeNull()
+      })
+      .end(done)
+  })
+  it('should return 404 and id is valid',(done) => {
+    request(app)
+      .patch('/todos/${new_id}')
+      .send()
+      .expect(404)
+      .end(done)
+  })
+  it('should return 404 and id is invalid',(done) => {
+    request(app)
+      .patch('/todos/d13hard')
+      .send()
       .expect(404)
       .end(done)
   })
