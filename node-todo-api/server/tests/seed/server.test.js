@@ -2,14 +2,43 @@ const request = require('supertest')
 const expect = require('expect')
 const sinon = require('sinon')
 const {ObjectID} = require('mongodb')
-const bcrypt = require('bcryptjs')
 
 const {app} = require('./../server')
-const {Todo} = require('./../models/todo')
-const {todos, populateTodos, text, new_id, users, populateUsers} = require('./seed/seed')
+const {todo} = require('./../models/todo')
 
-beforeEach(populateUsers)
-beforeEach(populateTodos)
+var text = 'Hey I am test'
+var todos = [
+  {
+    _id: new ObjectID(),
+    text: 'this is first to do'
+  },
+  {
+    _id: new ObjectID(),
+    text: 'this is second to do',
+    completed: true,
+    completedAt: 1237283383
+  },
+  {
+    _id: new ObjectID(),
+    text: 'i should be deleted'
+  }
+]
+
+var new_id = new ObjectID()
+
+beforeEach((done) => {
+  //delete todos
+  todo.find({text},todos[0],todos[1]).then((res) => {
+    if(res.length >= 1){
+      todo.deleteMany({text}).then(() => {},(err) => {return err})
+      todo.deleteMany(todos[0]).then(() => {},(err) => {return err})
+      todo.deleteMany(todos[1]).then(() => {},(err) => {return err})
+    }
+  })
+  //Insert todos
+  todo.insertMany(todos).then(()=>{},(err) => {return err})
+  return done()
+})
 
 describe('POST /todos', () => {
   it('should create a new todo', (done) => {
@@ -26,7 +55,7 @@ describe('POST /todos', () => {
           return done(err)
         }
 
-        Todo.find({text}).then((todos) => {
+        todo.find({text}).then((todos) => {
           expect(todos.length).toBeGreaterThanOrEqual(1)
           expect(todos[0]).toMatchObject({text})
           done()
@@ -95,7 +124,7 @@ describe('DELETE /todos/:id', () => {
           return done(err)
         }
         //check to see if the doc exists
-        Todo.findById(todo_id).then((n) => {
+        todo.findById(todo_id).then((n) => {
           expect(n).toBeNull()
           done()
         })
@@ -149,69 +178,12 @@ describe('PATCH /todos/:id', () => {
   })
 })
 
-describe('GET /users/me', () => {
-  it('should return user if authenticated', (done) => {
-    request(app)
-      .get('/users/me')
-      .set('x-auth', users[0].tokens[0].token)
-      .expect(200)
-      .expect((res) => {
-        expect(res.body.email).toBe(users[0].email)
-      })
-      .end(done)
-  })
-
-  it('should return 401 authentication failed', (done) => {
-    request(app)
-      .get('/users/me')
-      .expect(401)
-      .expect((res) => {
-        expect(res.body).toEqual({})
-      })
-      .end(done)
-  })
-})
-
-describe('POST /users', () => {
-  it('should create a user', (done) => {
-    var email = 'test3@example.com'
-    var password = 'test123!'
-
-    request(app)
-      .post('/users')
-      .send({email, password})
-      .expect(200)
-      .expect((res) => {
-        expect(res.headers['x-auth']).toBeDefined()
-        expect(res.body.email).toBe(email)
-      })
-      .end(done)
-  })
-
-  it('should return validation errors if request invalid', (done) => {
-    var email = 'test4example.com'
-    var password = 'test'
-
-    request(app)
-      .post('/users')
-      .send({email, password})
-      .expect(400)
-      .expect((res) => {
-        expect(res.body._message).toBe('User validation failed')
-      })
-      .end(done)
+describe('POST /users/login', () => {
+  it('should login user and return auth token', (done) => {
 
   })
 
-  it('should not create user if email is in use', (done) => {
-    var data = {email:users[0].email, password:users[0].password}
-    request(app)
-      .post('/users')
-      .send(data)
-      .expect(400)
-      .expect((res) => {
-        expect(res.body.code).toBe(11000)
-      })
-      .end(done)
+  it('should reject invalid login', (done) => {
+    
   })
 })
