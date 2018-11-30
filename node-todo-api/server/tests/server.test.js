@@ -5,6 +5,7 @@ const {ObjectID} = require('mongodb')
 const bcrypt = require('bcryptjs')
 
 const {app} = require('./../server')
+const {User} = require('./../models/user')
 const {Todo} = require('./../models/todo')
 const {todos, populateTodos, text, new_id, users, populateUsers} = require('./seed/seed')
 
@@ -213,5 +214,46 @@ describe('POST /users', () => {
         expect(res.body.code).toBe(11000)
       })
       .end(done)
+  })
+})
+
+describe('POST /users/login', () => {
+  it('should login user and return auth token', (done) => {
+    request(app)
+      .post('/users/login')
+      .send({email:users[0].email, password:users[0].password})
+      .expect(200)
+      .expect((res) => {
+        expect(res.headers['x-auth']).toBeDefined()
+      })
+      .end((err, res) => {
+        if(err){
+          return done(err)
+        }
+
+        User.findById(res.body._id).then((user) => {
+          expect(user.tokens[1]).toMatchObject({
+            access: 'auth',
+            token: res.headers['x-auth']
+          })
+          done()
+        }).catch((e) => done(e))
+      })
+
+  })
+
+  it('should reject invalid login', (done) => {
+    request(app)
+      .post('/users/login')
+      .send({email:'xys@example.com', password:'pw4xys'})
+      .expect(400)
+      .end((err, res) => {
+        if(err){
+          return done(err)
+        }
+
+        expect(res.headers['x-auth']).not.toBeDefined()
+        done()
+      })
   })
 })
