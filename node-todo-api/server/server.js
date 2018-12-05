@@ -18,8 +18,11 @@ var app = express()
 app.use(bodyparser.json())
 
 //TODOS routes
-app.post('/todos', (req, resp) => {
-  var todo = new Todo(req.body)
+app.post('/todos', authenticate, (req, resp) => {
+  var todo = new Todo({
+    text: req.body.text,
+    _creator: req.user._id
+  })
   todo.save().then((doc) => {
     resp.send(doc)
   },(err) => {
@@ -27,41 +30,46 @@ app.post('/todos', (req, resp) => {
   })
 })
 
-app.get('/todos', (req, resp) => {
-  Todo.find().then((todos) => {
+app.get('/todos', authenticate, (req, resp) => {
+  Todo.find({_creator: req.user._id}).then((todos) => {
     resp.send({todos})
   },(err) =>{
     resp.status(400).send(err)
   })
 })
 
-app.get('/todos/:id', (req, resp) => {
-  var id = req.params.id
-  if(!ObjectID.isValid(id)){
+app.get('/todos/:id', authenticate, (req, resp) => {
+  var _id = req.params.id
+  var _creator = req.user._id
+
+  if(!ObjectID.isValid(_id)){
     return resp.status(404).send()
   }
 
-  Todo.findById(id).then((todo) => {
+  Todo.findOne({_id, _creator}).then((todo) => {
     if(!todo){
-      return resp.status(404).send({"error":`ID:${id} not found`})
+      return resp.status(404).send({"error":`ID:${_id} not found`})
     }
     return resp.send({todo})
   }).catch((e) => {
-    return resp.status(400).send()
+    console.log(e)
+    return resp.status(400).send(e)
   })
 })
 
-app.delete('/todos/:id', (req, resp) => {
-  var id = req.params.id
+app.delete('/todos/:id', authenticate, (req, resp) => {
+  var _id = req.params.id
+  var _creator = req.user._id
 
-  if(!ObjectID.isValid(id)){
-    return resp.status(404).send({error: `ID:${id} is invalid`})
+  if(!ObjectID.isValid(_id)){
+    return resp.status(404).send({error: `ID:${_id} is invalid`})
   }
 
-  Todo.findByIdAndDelete(id).then((todo) => {
+  Todo.findOneAndDelete({_id, _creator}).then((todo) => {
     if(!todo){
-      return resp.status(404).send({error: `todo with ID:${id} not found`})
+      return resp.status(404).send({error: `todo with ID:${_id} not found`})
     }
+
     return resp.send({todo})
   }).catch((e) => {
     return resp.status(400).send()
@@ -69,8 +77,9 @@ app.delete('/todos/:id', (req, resp) => {
 
 })
 
-app.patch('/todos/:id', (req, resp) => {
+app.patch('/todos/:id', authenticate, (req, resp) => {
   var _id = req.params.id
+  var _creator = req.user._id
 
   //the variable a user can manipulate
   var body = _.pick(req.body, ['text', 'completed'])
@@ -89,13 +98,14 @@ app.patch('/todos/:id', (req, resp) => {
   }
 
   //Update todo doc
-  Todo.findByIdAndUpdate(_id, {$set: body}, {new: true}).then((todo) => {
+  Todo.findOneAndUpdate({_id, _creator}, {$set:body}, {new:true}).then((todo) => {
     if(!todo){
       return resp.status(404).send()
     }
     resp.send({todo})
   }).catch((e) => {
-    resp.status(400).send()
+    console.log(e)
+    resp.status(400).send(e)
   })
 
 })
@@ -129,6 +139,14 @@ app.post('/users/login', (req, resp) => {
 
 app.get('/users/me', authenticate, (req, resp) => {
   resp.send(req.user)
+})
+
+app.delete('/users/logout', authenticate, (req,resp) => {
+  req.user.removeToken(req.token).then(() => {
+    resp.send()
+  }, () => {
+    resp.status(400).send()
+  })
 })
 
 //Express running

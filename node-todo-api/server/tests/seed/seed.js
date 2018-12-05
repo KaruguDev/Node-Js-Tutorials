@@ -3,26 +3,67 @@ const {ObjectID} = require('mongodb')
 const {Todo} = require('./../../models/todo')
 const {User} = require('./../../models/user')
 
+var uid1 = new ObjectID()
+var uid2 = new ObjectID()
+var uid3 = new ObjectID()
+
+//Users
+const users = [{
+  _id: uid1,
+  email: 'abc@example.com',
+  password: 'abc123!',
+  tokens: [{
+    access: 'auth',
+    token: jwt.sign({_id:uid1, access:'auth'}, 's3cr3t').toString()
+  }]
+},{
+  _id: uid2,
+  email: 'def@example.com',
+  password: 'def123!'
+}, {
+  _id: uid3,
+  email: 'paul@example.com',
+  password: 'paul123!',
+  tokens: [{
+    access: 'auth',
+    token: jwt.sign({_id:uid3, access:'auth'}, 's3cr3t').toString()
+  }]
+}]
+
+const populateUsers = (done) => {
+  User.deleteMany({}).then(() => {
+    var user1 = new User(users[0]).save()
+    var user2 = new User(users[1]).save()
+    var user3 = new User(users[2]).save()
+
+    return Promise.all([user1, user2, user3])
+  }).then(() => done())
+}
+
+//Todos
 const todos = [
   {
-    _id: new ObjectID(),
-    text: 'this is first to do'
+    _id: new ObjectID() ,
+    text: 'this is first to do',
+    _creator: uid1
   },
   {
     _id: new ObjectID(),
     text: 'this is second to do',
+    _creator: uid3,
     completed: true,
-    completedAt: 1237283383
+    completedAt: 1237283383,
   },
   {
     _id: new ObjectID(),
-    text: 'i should be deleted'
+    text: 'i should be deleted',
+    _creator: uid3
   }
 ]
 
 const populateTodos = (done) => {
   //delete todos
-  Todo.remove({}).then(() => {
+  Todo.deleteMany({}).then(() => {
     return Todo.insertMany(todos)
   }).then(() => done())
 }
@@ -30,30 +71,6 @@ const populateTodos = (done) => {
 var text = 'Hey I am test'
 var new_id = new ObjectID()
 
-//Users
-const userId1 = new ObjectID()
-const userId2 = new ObjectID()
-const users = [{
-  _id: userId1,
-  email: 'abc@example.com',
-  password: 'abc123!',
-  tokens: [{
-    access: 'auth',
-    token: jwt.sign({_id:userId1, access:'auth'}, 's3cr3t').toString()
-  }]
-},{
-  _id: userId2,
-  email: 'def@example.com',
-  password: 'def123!',
-}]
 
-const populateUsers = (done) => {
-  User.remove({}).then(() => {
-    var user1 = new User(users[0]).save()
-    var user2 = new User(users[1]).save()
-
-    return Promise.all([user1, user2])
-  }).then(() => done())
-}
 
 module.exports = {todos, populateTodos, text, new_id, users, populateUsers}
