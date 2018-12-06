@@ -1,0 +1,20 @@
+{
+  "name": "chat-app",
+  "version": "1.0.0",
+  "description": "chat app",
+  "main": "./server/server.js",
+  "scripts": {
+    "start": "nodemon server/server.js",
+    "test": "nodemon tests/server.test.js"
+  },
+  "keywords": [
+    "chat",
+    "nodejs"
+  ],
+  "author": "Paul K",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "mongodb": "^3.1.10"
+  }
+}
