@@ -7,6 +7,9 @@
     "start": "nodemon server/server.js",
     "test": "nodemon tests/server.test.js"
   },
+  "engine":{
+    "node": "8.0.0"
+  },
   "keywords": [
     "chat",
     "nodejs"
