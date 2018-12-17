@@ -8,6 +8,8 @@ const publicPath = path.join(__dirname, '..', 'public')
 const partialsPath = path.join(__dirname, '../views/partials')
 const config = path.join(__dirname, '..', 'config', 'config.js')
 
+var {generateMessage} = require('./utils/message.js')
+
 //enviroment configurations
 require(config)
 
@@ -48,16 +50,19 @@ var io = socketIO(httpServer)
 io.on('connection', (socket) => {
   console.log('there is a new user connected')
 
+  socket.emit('loggedIN', generateMessage('Admin','Welcome to Chat App'))
+
+  socket.broadcast.emit('loggedIN', generateMessage('Admin','New user joined'))
   socket.on('createMessage', (msg) => {
     console.log('New Message created', msg)
 
     //add timestamp on message
     msg['timestamp'] = new Date().getTime()
 
-    socket.emit('newMessage', msg)
+    socket.broadcast.emit('newMessage', msg)
 
     //broadcast
-    io.emit('newMessage', msg)
+    //io.emit('newMessage', msg)
   })
 
   socket.on('disconnect', () => {
