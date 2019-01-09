@@ -8,7 +8,7 @@ const publicPath = path.join(__dirname, '..', 'public')
 const partialsPath = path.join(__dirname, '../views/partials')
 const config = path.join(__dirname, '..', 'config', 'config.js')
 
-var {generateMessage} = require('./utils/message.js')
+var {generateMessage, generateLocationMessage} = require('./utils/message.js')
 
 //enviroment configurations
 require(config)
@@ -50,19 +50,31 @@ var io = socketIO(httpServer)
 io.on('connection', (socket) => {
   console.log('there is a new user connected')
 
-  socket.emit('loggedIN', generateMessage('Admin','Welcome to Chat App'))
+  //socket.emit('loggedIN', generateMessage('Admin','Welcome to Chat App'))
 
-  socket.broadcast.emit('loggedIN', generateMessage('Admin','New user joined'))
-  socket.on('createMessage', (msg) => {
-    console.log('New Message created', msg)
+  //socket.broadcast.emit('loggedIN', generateMessage('Admin','New user joined'))
+  socket.on('createMessage', (message, callback) => {
+    console.log('New Message created', message)
+    callback()
 
     //add timestamp on message
-    msg['timestamp'] = new Date().getTime()
+    message['timestamp'] = new Date().getTime()
 
-    socket.broadcast.emit('newMessage', msg)
+    //socket.broadcast.emit('newMessage', message)
 
     //broadcast
-    //io.emit('newMessage', msg)
+    io.emit('newMessage', generateMessage(message.from, message.text))
+
+  })
+
+  socket.on('createLocationMessage', (message, callback) => {
+    console.log('New location message created', message)
+    callback()
+
+    console.log(message)
+    if (message.latitude && message.longitude){
+      io.emit('newLocationMessage', generateLocationMessage(message.from, message.latitude, message.longitude))
+    }
   })
 
   socket.on('disconnect', () => {

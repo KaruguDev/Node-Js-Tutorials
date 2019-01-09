@@ -13,11 +13,39 @@
     cursorborder: "none"
   };
 
-  NYLM = ["Уходи дверь закрой", "У меня теперь другой", "Все для тебя", "Мне не нужен больше твой номер в книжке записной", "Владимирский централ, ветер сука", "Ты ушол, а я текла", "Ты пришол в красный день календаря", "бла бла", ")", "умри", "ой все.", "ой все.", "ой все.", "Ты говоришь ТОЧНЕЕ пишешьСя сам с собой"];
+  NYLM = ["Hi!", "Welcome", "Thank You!"];
 
   getRandomInt = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
+
+  generateMessage = function(){
+    var msg = {}
+    msg['from'] = 'Paul'
+    msg['text'] = $('#texxt').val()
+
+    return msg
+  }
+
+  generateLocationMessage = function(){
+    //GPS LOCATION
+    var msg = {
+      from: 'Paul',
+      latitude: '',
+      longitude: ''
+    }
+
+    if(!navigator.geolocation){
+      return msg
+    }else{
+
+      navigator.geolocation.getCurrentPosition(function(location){
+        msg['lat'] = location.coords.latitude
+        msg['longitude'] = location.coords.longitude
+      });
+      return msg
+    }
+  }
 
   claerResizeScroll = function() {
     $("#texxt").val("");
@@ -25,32 +53,53 @@
     return $(".messages").getNiceScroll(0).doScrollTop(999999, 999);
   };
 
-  insertI = function() {
-    var innerText, otvet;
+  socket.on('newMessage',function(msg) {
+    var innerText;
     innerText = $.trim($("#texxt").val());
-    if (innerText !== "") {
-      $(".messages").append("<li class=\"i\"><div class=\"head\"><span class=\"time\">" + (new Date().getHours()) + ":" + (new Date().getMinutes()) + " AM, Today</span><span class=\"name\"> Буль</span></div><div class=\"message\">" + innerText + "</div></li>");
+    if (innerText !== '' || msg.text !== undefined && msg.text !== '') {
+      $(".messages").append("<li class=\"i\">\
+                              <div class=\"head\">\
+                                <span class=\"time\">" + (new Date().getHours()) + ":" + (new Date().getMinutes()) + ", Today</span>\
+                                <span class=\"name\"> "+msg.from+" </span>\
+                              </div>\
+                              <div class=\"message\">" + msg.text + "</div>\
+                             </li>");
       claerResizeScroll();
-      return otvet = setInterval(function() {
-        $(".messages").append("<li class=\"friend-with-a-SVAGina\"><div class=\"head\"><span class=\"name\">Юния  </span><span class=\"time\">" + (new Date().getHours()) + ":" + (new Date().getMinutes()) + " AM, Today</span></div><div class=\"message\">" + NYLM[getRandomInt(0, NYLM.length - 1)] + "</div></li>");
-        claerResizeScroll();
-        return clearInterval(otvet);
-      }, getRandomInt(2500, 500));
     }
-  };
+  });
+
+  socket.on('newLocationMessage',function(msg) {
+    var innerText;
+    innerText = $.trim($("#texxt").val());
+    if (innerText !== '' || msg.text !== undefined && msg.text !== '') {
+      $(".messages").append("<li class=\"i\">\
+                              <div class=\"head\">\
+                                <span class=\"time\">" + (new Date().getHours()) + ":" + (new Date().getMinutes()) + ", Today</span>\
+                                <span class=\"name\"> "+msg.from+" </span>\
+                              </div>\
+                              <div class=\"message\"><a target='_blank' href="+msg.url+">My Current Location</a></div>\
+                             </li>");
+      claerResizeScroll();
+    }
+  });
 
   $(document).ready(function() {
+    var msg = {}
+    msg['from'] = 'Paul'
+
     $(".list-friends").niceScroll(conf);
     $(".messages").niceScroll(lol);
     $("#texxt").keypress(function(e) {
       if (e.keyCode === 13) {
-        insertI();
+        socket.emit('createMessage', generateMessage(), function(){console.log('message created')})
+        socket.emit('createLocationMessage', generateLocationMessage(), function(){console.log('location message created')})
+        //insertI(msg);
         return false;
       }
     });
     return $(".send").click(function() {
-      return insertI();
-    });
-  });
-
-}).call(this);
+      socket.emit('createMessage', generateMessage(), function(){console.log('message created')})
+      socket.emit('createLocationMessage', generateLocationMessage(), function(){console.log('location message created')})
+    })
+  })
+}).call(this)
