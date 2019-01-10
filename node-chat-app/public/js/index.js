@@ -1,105 +1,61 @@
-(function() {
-  var NYLM, claerResizeScroll, conf, getRandomInt, insertI, lol;
+var socket = io();
 
-  conf = {
-    cursorcolor: "#696c75",
-    cursorwidth: "4px",
-    cursorborder: "none"
-  };
+socket.on('connect', function () {
+  console.log('Connected to server');
+});
 
-  lol = {
-    cursorcolor: "#cdd2d6",
-    cursorwidth: "4px",
-    cursorborder: "none"
-  };
+socket.on('disconnect', function () {
+  console.log('Disconnected from server');
+});
 
-  NYLM = ["Hi!", "Welcome", "Thank You!"];
+socket.on('newMessage', function (message) {
+  var formattedTime = moment(message.createdAt).format('h:mm A')
+  var li = jQuery('<li></li>');
+  li.text(`${message.from} ${formattedTime}: ${message.text}`);
 
-  getRandomInt = function(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
+  jQuery('#messages').append(li);
+});
 
-  generateMessage = function(){
-    var msg = {}
-    msg['from'] = 'Paul'
-    msg['text'] = $('#texxt').val()
+socket.on('newLocationMessage', function (message) {
+  var formattedTime = moment(message.createdAt).format('h:mm A')
+  var li = jQuery('<li></li>');
+  var a = jQuery('<a target="_blank">My current location</a>');
 
-    return msg
+  li.text(`${message.from} ${formattedTime}: `);
+  a.attr('href', message.url);
+  li.append(a);
+  jQuery('#messages').append(li);
+});
+
+jQuery('#message-form').on('submit', function (e) {
+  e.preventDefault();
+
+  var messageTextbox = jQuery('[name=message]');
+
+  socket.emit('createMessage', {
+    from: 'User',
+    text: messageTextbox.val()
+  }, function () {
+    messageTextbox.val('')
+  });
+});
+
+var locationButton = jQuery('#send-location');
+locationButton.on('click', function () {
+  if (!navigator.geolocation) {
+    return alert('Geolocation not supported by your browser.');
   }
 
-  generateLocationMessage = function(){
-    //GPS LOCATION
-    var msg = {
-      from: 'Paul',
-      latitude: '',
-      longitude: ''
-    }
+  locationButton.attr('disabled', 'disabled').text('Sending location...');
 
-    if(!navigator.geolocation){
-      return msg
-    }else{
-
-      navigator.geolocation.getCurrentPosition(function(location){
-        msg['lat'] = location.coords.latitude
-        msg['longitude'] = location.coords.longitude
-      });
-      return msg
-    }
-  }
-
-  claerResizeScroll = function() {
-    $("#texxt").val("");
-    $(".messages").getNiceScroll(0).resize();
-    return $(".messages").getNiceScroll(0).doScrollTop(999999, 999);
-  };
-
-  socket.on('newMessage',function(msg) {
-    var innerText;
-    innerText = $.trim($("#texxt").val());
-    if (innerText !== '' || msg.text !== undefined && msg.text !== '') {
-      $(".messages").append("<li class=\"i\">\
-                              <div class=\"head\">\
-                                <span class=\"time\">" + (new Date().getHours()) + ":" + (new Date().getMinutes()) + ", Today</span>\
-                                <span class=\"name\"> "+msg.from+" </span>\
-                              </div>\
-                              <div class=\"message\">" + msg.text + "</div>\
-                             </li>");
-      claerResizeScroll();
-    }
-  });
-
-  socket.on('newLocationMessage',function(msg) {
-    var innerText;
-    innerText = $.trim($("#texxt").val());
-    if (innerText !== '' || msg.text !== undefined && msg.text !== '') {
-      $(".messages").append("<li class=\"i\">\
-                              <div class=\"head\">\
-                                <span class=\"time\">" + (new Date().getHours()) + ":" + (new Date().getMinutes()) + ", Today</span>\
-                                <span class=\"name\"> "+msg.from+" </span>\
-                              </div>\
-                              <div class=\"message\"><a target='_blank' href="+msg.url+">My Current Location</a></div>\
-                             </li>");
-      claerResizeScroll();
-    }
-  });
-
-  $(document).ready(function() {
-    var msg = {}
-    msg['from'] = 'Paul'
-
-    $(".list-friends").niceScroll(conf);
-    $(".messages").niceScroll(lol);
-    $("#texxt").keypress(function(e) {
-      if (e.keyCode === 13) {
-        socket.emit('createMessage', generateMessage(), function(){console.log('message created')})
-        socket.emit('createLocationMessage', generateLocationMessage(), function(){console.log('location message created')})
-        //insertI(msg);
-        return false;
-      }
+  navigator.geolocation.getCurrentPosition(function (position) {
+    locationButton.removeAttr('disabled').text('Send location');
+    socket.emit('createLocationMessage', {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude
     });
-    return $(".send").click(function() {
-      socket.emit('createMessage', generateMessage(), function(){console.log('message created')})
-      socket.emit('createLocationMessage', generateLocationMessage(), function(){console.log('location message created')})
-    })
-  })
-}).call(this)
+  }, function () {
+    locationButton.removeAttr('disabled').text('Send location');
+    alert('Unable to fetch location.');
+  });
+});
