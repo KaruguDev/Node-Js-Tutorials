@@ -3,9 +3,13 @@ class Users {
     this.users = []
   }
   addUser(id, name, room){
-    var user = {id, name, room}
-    this.users.push(user)
-    return user
+    var isUser = this.ifUserExists(name, room)
+    if (!isUser){
+      var user = {id, name, room}
+      this.users.push(user)
+      return user
+    }
+    return isUser
   }
   getUser(id){
     var user = this.users.filter((user) => user.id === id)[0]
@@ -22,6 +26,15 @@ class Users {
         this.users = this.users.filter((user) => user.id !== id)
     }
     return user
+  }
+  ifUserExists(name, room){
+    var user = this.users.filter((user) => user.name === name && user.room === room)[0]
+    return user
+  }
+  getRoomsList(){
+    var rooms = this.users.map((user) => user.room)
+    var roomsArray = Array.from(new Set(rooms))
+    return roomsArray
   }
 }
 

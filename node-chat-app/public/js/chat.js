@@ -26,14 +26,39 @@ socket.on('connect', function () {
       alert(err)
       window.location.href = '/'
     }else{
-      console.log('No error')
+
     }
   })
 });
 
 socket.on('disconnect', function () {
-  console.log('Disconnected from server');
+
 });
+
+socket.on('updateUserList', function(users){
+  var ol = $('<ol></ol>')
+
+  users.forEach(function(user){
+    ol.append($('<li></li>').text(user))
+  })
+
+  $('#users').html(ol)
+})
+
+socket.on('existingRooms', function(rooms){
+  console.log(rooms)
+  if(rooms){
+    $('#rooms').removeAttr('disabled')
+
+    var ol = $('<ol></ol>')
+    rooms.forEach((room) => {
+      ol.append($('<li></li>').text(room))
+    })
+    $('rooms').html(ol)
+  }else{
+    $('#rooms').attr('disabled', 'disabled')
+  }
+})
 
 socket.on('newMessage', function (message) {
   var template = $('#message-template').html()
@@ -68,7 +93,6 @@ jQuery('#message-form').on('submit', function (e) {
   var messageTextbox = jQuery('[name=message]');
 
   socket.emit('createMessage', {
-    from: 'User',
     text: messageTextbox.val()
   }, function () {
     messageTextbox.val('')

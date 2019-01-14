@@ -55,4 +55,13 @@ describe('Users', () => {
     var result = users.removeUser(user.id)
     expect(users.users).not.toContain(user)
   })
+  it('check if user exists', () => {
+    var user = {name: 'Ken', room: 'Alpha'}
+    var result = users.ifUserExists(user.name, user.room)
+    expect(users.users).toContain(result)
+  })
+  it('get rooms list', () => {
+    var roomsArray = users.getRoomsList()
+    expect(roomsArray).toEqual(['Alpha', 'Beta', 'Omega'])
+  })
 })
