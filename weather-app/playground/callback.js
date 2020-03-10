@@ -1,6 +1,6 @@
-var getUser = (id, callback) => {
+const getUser = (id, callback) => {
 
-  var user = {
+  const user = {
     id:id,
     name: 'Steve Ackel'
   }
@@ -13,4 +13,14 @@ var getUser = (id, callback) => {
 
 getUser(31, (usrObj) => {
   console.log(usrObj)
+})
+
+const add = (a, b, callback) => {
+  setTimeout(() => {
+    callback(a+b)
+  }, 2000);
+}
+
+add(1,5, (total)=>{
+  console.log(total)
 })

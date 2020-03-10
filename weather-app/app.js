@@ -25,6 +25,7 @@ geocode.geocodeAddress(argv.l, (err, gResults) => {
       if (err){
         console.log(err)
       }else{
+        console.log(wResults)
         if (gResults.place){
           console.log(gResults.place)
         }else{
