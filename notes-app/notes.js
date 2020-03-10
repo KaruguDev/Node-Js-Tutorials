@@ -4,7 +4,7 @@
 const fs = require('fs')
 
 //re-usable functions
-var fetchNotes = () => {
+const fetchNotes = () => {
   try {
     noteString = fs.readFileSync('notes-data.json')
     notes = JSON.parse(noteString)
@@ -14,12 +14,12 @@ var fetchNotes = () => {
   }
 }
 
-var saveNotes = (notes) => {
+const saveNotes = (notes) => {
   fs.writeFileSync('notes-data.json', JSON.stringify(notes))
 }
 
 //arrow functions
-addNote = (title, body) => {
+const addNote = (title, body) => {
   var notes = fetchNotes()
   var note = {
     title,
@@ -27,7 +27,7 @@ addNote = (title, body) => {
   }
 
   //check for duplicates
-  var duplicateNotes = notes.filter((note) => note.title === title )
+  const duplicateNotes = notes.filter((note) => note.title === title )
 
   if (duplicateNotes.length === 0){
     notes.push(note)
@@ -38,20 +38,20 @@ addNote = (title, body) => {
   }
 }
 
-getAll = () => {
+const getAll = () => {
   return fetchNotes()
 }
 
-readNote = (title) => {
+const readNote = (title) => {
   //fetch notes
   notes = fetchNotes()
   //filter notes
-  filteredNotes = notes.filter((note) => note.title === title)
+  findNote = notes.find((note) => note.title === title)
   //return note
-  return filteredNotes[0]
+  return findNote
 }
 
-removeNote = (title) => {
+const removeNote = (title) => {
   //fetch notes
   notes = fetchNotes()
   //filter note and remove the one with the same title
@@ -62,8 +62,8 @@ removeNote = (title) => {
   return notes.length !== toSaveNotes.length
 }
 
-logNote =  (note) => {
-  debugger
+const logNote =  (note) => {
+  //debugger
   console.log('--')
   console.log(`Title: ${note.title}`)
   console.log(`Body: ${note.body}`)
