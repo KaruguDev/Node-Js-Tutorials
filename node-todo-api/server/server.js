@@ -6,20 +6,20 @@ const bodyparser = require('body-parser')
 const {ObjectID} = require('mongodb')
 const bcrypt = require('bcryptjs')
 
-var {mongoose} = require('./db/mongoose')
-var {Todo} = require('./models/todo')
-var {User} = require('./models/user')
-var {authenticate} =require('./middleware/authenticate')
+//const {mongoose} = require('./db/mongoose')
+const {Todo} = require('./models/todo')
+const {User} = require('./models/user')
+const {authenticate} =require('./middleware/authenticate')
 
-var port = 4000
-var app = express()
+const port = 4000
+const app = express()
 
 //middleware
 app.use(bodyparser.json())
 
 //TODOS routes
 app.post('/todos', authenticate, (req, resp) => {
-  var todo = new Todo({
+  let todo = new Todo({
     text: req.body.text,
     _creator: req.user._id
   })
@@ -39,8 +39,8 @@ app.get('/todos', authenticate, (req, resp) => {
 })
 
 app.get('/todos/:id', authenticate, (req, resp) => {
-  var _id = req.params.id
-  var _creator = req.user._id
+  let _id = req.params.id
+  let _creator = req.user._id
 
   if(!ObjectID.isValid(_id)){
     return resp.status(404).send()
@@ -58,8 +58,8 @@ app.get('/todos/:id', authenticate, (req, resp) => {
 })
 
 app.delete('/todos/:id', authenticate, (req, resp) => {
-  var _id = req.params.id
-  var _creator = req.user._id
+  let _id = req.params.id
+  let _creator = req.user._id
 
   if(!ObjectID.isValid(_id)){
     return resp.status(404).send({error: `ID:${_id} is invalid`})
@@ -78,11 +78,11 @@ app.delete('/todos/:id', authenticate, (req, resp) => {
 })
 
 app.patch('/todos/:id', authenticate, (req, resp) => {
-  var _id = req.params.id
-  var _creator = req.user._id
+  let _id = req.params.id
+  let _creator = req.user._id
 
   //the variable a user can manipulate
-  var body = _.pick(req.body, ['text', 'completed'])
+  let body = _.pick(req.body, ['text', 'completed'])
 
   //check validity of id
   if(!ObjectID.isValid(_id)){
@@ -112,9 +112,9 @@ app.patch('/todos/:id', authenticate, (req, resp) => {
 
 //USERS routes
 app.post('/users', (req, resp) => {
-  var body = _.pick(req.body, ['email', 'password'])
+  let body = _.pick(req.body, ['email', 'password'])
 
-  var user = new User(body)
+  let user = new User(body)
   user.save().then(() => {
     return user.generateAuthToken()
   }).then((token) => {
@@ -125,7 +125,7 @@ app.post('/users', (req, resp) => {
 })
 
 app.post('/users/login', (req, resp) => {
-  var body = _.pick(req.body, ['email', 'password'])
+  let body = _.pick(req.body, ['email', 'password'])
 
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {

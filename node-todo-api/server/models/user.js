@@ -4,7 +4,7 @@ const validator = require('validator')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
-var UserSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
   email:{
     type: String,
     validate:{
@@ -35,17 +35,17 @@ var UserSchema = new mongoose.Schema({
 
 //Overide Method
 UserSchema.methods.toJSON = function(){
-  var user = this
-  var userObj = user.toObject()
+  let user = this
+  let userObj = user.toObject()
 
   return _.pick(userObj, ['_id', 'email'])
 }
 
 //Custom method
 UserSchema.methods.generateAuthToken = function(){
-  var user = this
-  var access = 'auth'
-  var token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString()
+  let user = this
+  let access = 'auth'
+  let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString()
 
   user.tokens = user.tokens.concat([{access, token}])
   return user.save().then(() =>{
@@ -54,7 +54,7 @@ UserSchema.methods.generateAuthToken = function(){
 }
 
 UserSchema.methods.removeToken = function(token){
-  var user = this
+  let user = this
 
   return user.updateOne({
     $pull:{
@@ -67,8 +67,8 @@ UserSchema.methods.removeToken = function(token){
 
 //Custom Model method
 UserSchema.statics.findByToken = function(token){
-  var User = this
-  var decoded
+  let User = this
+  let decoded
 
   try {
     decoded = jwt.verify(token, process.env.JWT_SECRET)
@@ -84,7 +84,7 @@ UserSchema.statics.findByToken = function(token){
 }
 
 UserSchema.statics.findByCredentials = function(email, password){
-  var User = this
+  let User = this
 
   return User.findOne({email}).then((user) => {
     if(!user){
@@ -105,10 +105,10 @@ UserSchema.statics.findByCredentials = function(email, password){
 }
 
 UserSchema.pre('save', function(next){
-  var user = this
+  let user = this
 
   if(user.isModified('password')){
-    var pass = user.password
+    let pass = user.password
 
     bcrypt.genSalt(10, (err, salt) => {
       bcrypt.hash(pass, salt, (err, hash) =>{
@@ -121,6 +121,6 @@ UserSchema.pre('save', function(next){
   }
 })
 
-var User = mongoose.model('User', UserSchema )
+const User = mongoose.model('User', UserSchema )
 
 module.exports = {User}

@@ -3,9 +3,9 @@ const {ObjectID} = require('mongodb')
 const {Todo} = require('./../../models/todo')
 const {User} = require('./../../models/user')
 
-var uid1 = new ObjectID()
-var uid2 = new ObjectID()
-var uid3 = new ObjectID()
+let uid1 = new ObjectID()
+let uid2 = new ObjectID()
+let uid3 = new ObjectID()
 
 //Users
 const users = [{
@@ -32,9 +32,9 @@ const users = [{
 
 const populateUsers = (done) => {
   User.deleteMany({}).then(() => {
-    var user1 = new User(users[0]).save()
-    var user2 = new User(users[1]).save()
-    var user3 = new User(users[2]).save()
+    let user1 = new User(users[0]).save()
+    let user2 = new User(users[1]).save()
+    let user3 = new User(users[2]).save()
 
     return Promise.all([user1, user2, user3])
   }).then(() => done())
@@ -68,8 +68,8 @@ const populateTodos = (done) => {
   }).then(() => done())
 }
 
-var text = 'Hey I am test'
-var new_id = new ObjectID()
+let text = 'Hey I am test'
+let new_id = new ObjectID()
 
 
 

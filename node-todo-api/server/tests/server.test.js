@@ -15,8 +15,8 @@ beforeEach(populateTodos)
 
 describe('POST /users', () => {
   it('should create a user', (done) => {
-    var email = "test@example.com"
-    var password = "pw4test!"
+    let email = "test@example.com"
+    let password = "pw4test!"
 
     request(app)
       .post('/users')
@@ -30,8 +30,8 @@ describe('POST /users', () => {
   })
 
   it('should return validation errors if request invalid', (done) => {
-    var email = 'test4example.com'
-    var password = 'test'
+    let email = 'test4example.com'
+    let password = 'test'
 
     request(app)
       .post('/users')
@@ -45,7 +45,7 @@ describe('POST /users', () => {
   })
 
   it('should not create user if email is in use', (done) => {
-    var data = {email:users[0].email, password:users[0].password}
+    let data = {email:users[0].email, password:users[0].password}
     request(app)
       .post('/users')
       .send(data)
@@ -248,7 +248,7 @@ describe('DELETE /todos/:id', () => {
   })
 
   it('should delete a todo doc', (done) => {
-    var todo_id = todos[2]._id.toHexString()
+    let todo_id = todos[2]._id.toHexString()
     request(app)
       .delete(`/todos/${todo_id}`)
       .set('x-auth', users[2].tokens[0].token)
@@ -287,8 +287,8 @@ describe('DELETE /todos/:id', () => {
 
 describe('PATCH /todos/:id', () => {
   it('should not update a todo doc if not authenticated', (done) => {
-    var todo_id = todos[1]._id.toHexString()
-    var body = {text: 'test todo doc update', completed: false}
+    let todo_id = todos[1]._id.toHexString()
+    let body = {text: 'test todo doc update', completed: false}
 
     request(app)
       .patch(`/todos/${todo_id}`)
@@ -298,8 +298,8 @@ describe('PATCH /todos/:id', () => {
   })
 
   it('should update todo doc', (done) => {
-    var todo_id = todos[1]._id.toHexString()
-    var body = {text: 'test todo doc update', completed: false}
+    let todo_id = todos[1]._id.toHexString()
+    let body = {text: 'test todo doc update', completed: false}
 
     request(app)
       .patch(`/todos/${todo_id}`)

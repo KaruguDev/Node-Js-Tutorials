@@ -1,7 +1,7 @@
-var {User} = require('./../models/user')
+const {User} = require('./../models/user')
 
-var authenticate = (req, resp, next) => {
-  var token = req.header('x-auth')
+const authenticate = (req, resp, next) => {
+  const token = req.header('x-auth')
 
   User.findByToken(token).then((user) => {
     if(!user){
