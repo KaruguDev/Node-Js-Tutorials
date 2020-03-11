@@ -1,0 +1,11 @@
+{
+  "name": "playground",
+  "version": "1.0.0",
+  "description": "my fun space of testing ideas",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "KaruguDev",
+  "license": "ISC"
+}
